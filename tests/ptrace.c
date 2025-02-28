@@ -31,14 +31,18 @@
 #include "xlat.h"
 #define XLAT_MACROS_ONLY
 # include "xlat/elf_em.h"
+# include "xlat/audit_arch.h"
 #undef XLAT_MACROS_ONLY
-#include "xlat/audit_arch.h"
 
 #define NULL_FD 23
 #define NULL_STR "/dev/null"
 
 #ifndef NULL_FD_STR
 # define NULL_FD_STR ""
+#endif
+
+#ifndef SKIP_IF_PROC_IS_UNAVAILABLE
+# define SKIP_IF_PROC_IS_UNAVAILABLE
 #endif
 
 static const char null_path[] = "/dev/null";
@@ -1694,6 +1698,8 @@ main(void)
 		(unsigned long) 0xdeadcafefffff00dULL;
 	const int pid = getpid();
 
+	SKIP_IF_PROC_IS_UNAVAILABLE;
+
 	int null_fd = open(null_path, O_RDONLY);
 	if (null_fd < 0)
 		perror_msg_and_fail("open(\"%s\")", null_path);
@@ -2178,11 +2184,11 @@ main(void)
 	do_ptrace(PTRACE_SETSIGINFO, pid, bad_request, (uintptr_t) sip);
 	printf("ptrace(" XLAT_FMT ", %d, %#lx, {si_signo=" XLAT_FMT_U
 	       ", si_code=" XLAT_KNOWN(0x1, "SYS_SECCOMP") ", si_errno=%u"
-	       ", si_call_addr=NULL, si_syscall=" XLAT_FMT_U ", si_arch=%s}"
-	       ") = %s\n",
+	       ", si_call_addr=NULL, si_syscall=" XLAT_FMT_U ", si_arch="
+	       XLAT_FMT "}) = %s\n",
 	       XLAT_ARGS(PTRACE_SETSIGINFO), pid, bad_request,
 	       XLAT_ARGS(SIGSYS), sip->si_errno, XLAT_ARGS(__NR_read),
-	       sprintxval(audit_arch, CUR_AUDIT_ARCH, "AUDIT_ARCH_???"),
+	       XLAT_SEL(CUR_AUDIT_ARCH, CUR_AUDIT_ARCH_STR),
 	       errstr);
 # endif
 # if defined(PERS0_AUDIT_ARCH)
@@ -2193,10 +2199,10 @@ main(void)
 	printf("ptrace(" XLAT_FMT ", %d, %#lx, {si_signo=" XLAT_FMT_U
 	       ", si_code=" XLAT_KNOWN(0x1, "SYS_SECCOMP") ", si_errno=%u"
 	       ", si_call_addr=NULL, si_syscall=%u" NRAW(" /* gettid */")
-	       ", si_arch=%s}) = %s\n",
+	       ", si_arch=" XLAT_FMT "}) = %s\n",
 	       XLAT_ARGS(PTRACE_SETSIGINFO), pid, bad_request,
 	       XLAT_ARGS(SIGSYS), sip->si_errno, PERS0__NR_gettid,
-	       sprintxval(audit_arch, PERS0_AUDIT_ARCH, "AUDIT_ARCH_???"),
+	       XLAT_SEL(PERS0_AUDIT_ARCH, PERS0_AUDIT_ARCH_STR),
 	       errstr);
 # endif
 # if defined(M32_AUDIT_ARCH)
@@ -2207,10 +2213,10 @@ main(void)
 	printf("ptrace(" XLAT_FMT ", %d, %#lx, {si_signo=" XLAT_FMT_U
 	       ", si_code=" XLAT_KNOWN(0x1, "SYS_SECCOMP") ", si_errno=%u"
 	       ", si_call_addr=NULL, si_syscall=%u" NRAW(" /* gettid */")
-	       ", si_arch=%s}) = %s\n",
+	       ", si_arch=" XLAT_FMT "}) = %s\n",
 	       XLAT_ARGS(PTRACE_SETSIGINFO), pid, bad_request,
 	       XLAT_ARGS(SIGSYS), sip->si_errno, M32__NR_gettid,
-	       sprintxval(audit_arch, M32_AUDIT_ARCH, "AUDIT_ARCH_???"),
+	       XLAT_SEL(M32_AUDIT_ARCH, M32_AUDIT_ARCH_STR),
 	       errstr);
 # endif
 # if defined(MX32_AUDIT_ARCH)
@@ -2221,10 +2227,10 @@ main(void)
 	printf("ptrace(" XLAT_FMT ", %d, %#lx, {si_signo=" XLAT_FMT_U
 	       ", si_code=" XLAT_KNOWN(0x1, "SYS_SECCOMP") ", si_errno=%u"
 	       ", si_call_addr=NULL, si_syscall=%u" NRAW(" /* gettid */")
-	       ", si_arch=%s}) = %s\n",
+	       ", si_arch=" XLAT_FMT "}) = %s\n",
 	       XLAT_ARGS(PTRACE_SETSIGINFO), pid, bad_request,
 	       XLAT_ARGS(SIGSYS), sip->si_errno, MX32__NR_gettid,
-	       sprintxval(audit_arch, MX32_AUDIT_ARCH, "AUDIT_ARCH_???"),
+	       XLAT_SEL(MX32_AUDIT_ARCH, MX32_AUDIT_ARCH_STR),
 	       errstr);
 # endif
 #endif

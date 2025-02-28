@@ -31,14 +31,17 @@
 #include "xlat.h"
 #define XLAT_MACROS_ONLY
 # include "xlat/elf_em.h"
+# include "xlat/audit_arch.h"
 #undef XLAT_MACROS_ONLY
-#include "xlat/audit_arch.h"
 
 #ifndef INJECT_RETVAL
 # define INJECT_RETVAL 0
 #endif
 #ifndef PRINT_PATHS
 # define PRINT_PATHS 0
+#endif
+#ifndef SKIP_IF_PROC_IS_UNAVAILABLE
+# define SKIP_IF_PROC_IS_UNAVAILABLE
 #endif
 
 #if INJECT_RETVAL
@@ -89,6 +92,7 @@ main(int argc, char **argv)
 		(kernel_ulong_t) 0xdeadbeefbadc0dedULL;
 	long rc;
 
+	SKIP_IF_PROC_IS_UNAVAILABLE;
 	PIDNS_TEST_INIT;
 
 	/*
@@ -233,12 +237,11 @@ main(int argc, char **argv)
 			printf(" => ");
 		if (!i || (rc >= 0)) {
 			printf("{id=0, pid=%d%s, flags=0, data={nr=" XLAT_FMT_U
-			       ", arch=%s, instruction_pointer=NULL, " ARGS_STR
-			       "}}",
+			       ", arch=" XLAT_FMT ", instruction_pointer=NULL, "
+			       ARGS_STR "}}",
 			       getpid(), pidns_pid2str(PT_TGID),
 			       XLAT_ARGS(__NR_gettid),
-			       sprintxval(audit_arch, CUR_AUDIT_ARCH,
-					  "AUDIT_ARCH_???"));
+			       XLAT_SEL(CUR_AUDIT_ARCH, CUR_AUDIT_ARCH_STR));
 		} else {
 			printf("%p", notif);
 		}
@@ -256,12 +259,11 @@ main(int argc, char **argv)
 			printf(" => ");
 		if (!i || (rc >= 0)) {
 			printf("{id=0, pid=%d%s, flags=0, data={nr=%u"
-			       NRAW(" /* gettid */") ", arch=%s"
+			       NRAW(" /* gettid */") ", arch=" XLAT_FMT
 			       ", instruction_pointer=NULL, " ARGS_STR "}}",
 			       getpid(), pidns_pid2str(PT_TGID),
 			       PERS0__NR_gettid,
-			       sprintxval(audit_arch, PERS0_AUDIT_ARCH,
-					  "AUDIT_ARCH_???"));
+			       XLAT_SEL(PERS0_AUDIT_ARCH, PERS0_AUDIT_ARCH_STR));
 		} else {
 			printf("%p", notif);
 		}
@@ -280,11 +282,10 @@ main(int argc, char **argv)
 			printf(" => ");
 		if (!i || (rc >= 0)) {
 			printf("{id=0, pid=%d%s, flags=0, data={nr=%u"
-			       NRAW(" /* gettid */") ", arch=%s"
+			       NRAW(" /* gettid */") ", arch=" XLAT_FMT
 			       ", instruction_pointer=NULL, " ARGS_STR "}}",
 			       getpid(), pidns_pid2str(PT_TGID), M32__NR_gettid,
-			       sprintxval(audit_arch, M32_AUDIT_ARCH,
-					  "AUDIT_ARCH_???"));
+			       XLAT_SEL(M32_AUDIT_ARCH, M32_AUDIT_ARCH_STR));
 		} else {
 			printf("%p", notif);
 		}
@@ -303,12 +304,11 @@ main(int argc, char **argv)
 			printf(" => ");
 		if (!i || (rc >= 0)) {
 			printf("{id=0, pid=%d%s, flags=0, data={nr=%u"
-			       NRAW(" /* gettid */") ", arch=%s"
+			       NRAW(" /* gettid */") ", arch=" XLAT_FMT
 			       ", instruction_pointer=NULL, " ARGS_STR "}}",
 			       getpid(), pidns_pid2str(PT_TGID),
 			       MX32__NR_gettid,
-			       sprintxval(audit_arch, MX32_AUDIT_ARCH,
-					  "AUDIT_ARCH_???"));
+			       XLAT_SEL(MX32_AUDIT_ARCH, MX32_AUDIT_ARCH_STR));
 		} else {
 			printf("%p", notif);
 		}
