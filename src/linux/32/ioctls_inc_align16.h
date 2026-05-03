@@ -1924,7 +1924,7 @@
 { "linux/phantom.h", "PHN_SET_REG", _IOC_WRITE, 0x7001, 0x04 },
 { "linux/phantom.h", "PHN_SET_REGS", _IOC_WRITE, 0x7003, 0x04 },
 { "linux/pidfd.h", "PIDFD_GET_CGROUP_NAMESPACE", _IOC_NONE, 0xff01, 0x00 },
-{ "linux/pidfd.h", "PIDFD_GET_INFO", _IOC_READ|_IOC_WRITE, 0xff0b, 0x50 },
+{ "linux/pidfd.h", "PIDFD_GET_INFO", _IOC_READ|_IOC_WRITE, 0xff0b, 0x58 },
 { "linux/pidfd.h", "PIDFD_GET_IPC_NAMESPACE", _IOC_NONE, 0xff02, 0x00 },
 { "linux/pidfd.h", "PIDFD_GET_MNT_NAMESPACE", _IOC_NONE, 0xff03, 0x00 },
 { "linux/pidfd.h", "PIDFD_GET_NET_NAMESPACE", _IOC_NONE, 0xff04, 0x00 },
