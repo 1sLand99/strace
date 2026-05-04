@@ -1476,6 +1476,7 @@ DECL_IOCTL(kvm);
 DECL_IOCTL(lirc);
 DECL_IOCTL(nbd);
 DECL_IOCTL(nsfs);
+DECL_IOCTL(pidfd);
 DECL_IOCTL(ptp);
 DECL_IOCTL(random);
 DECL_IOCTL(seccomp);
