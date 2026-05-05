@@ -15,6 +15,26 @@
 CHECK_TYPE_SIZE(struct pidfd_info, PIDFD_INFO_SIZE_VER3);
 
 static bool
+pidfd_ioctl_is_namespace_fd(const unsigned int code)
+{
+	switch (code) {
+		case PIDFD_GET_CGROUP_NAMESPACE:
+		case PIDFD_GET_IPC_NAMESPACE:
+		case PIDFD_GET_MNT_NAMESPACE:
+		case PIDFD_GET_NET_NAMESPACE:
+		case PIDFD_GET_PID_NAMESPACE:
+		case PIDFD_GET_PID_FOR_CHILDREN_NAMESPACE:
+		case PIDFD_GET_TIME_NAMESPACE:
+		case PIDFD_GET_TIME_FOR_CHILDREN_NAMESPACE:
+		case PIDFD_GET_USER_NAMESPACE:
+		case PIDFD_GET_UTS_NAMESPACE:
+			return true;
+		default:
+			return false;
+	}
+}
+
+static bool
 pidfd_ioctl_is_get_info(const unsigned int code)
 {
 	return _IOC_TYPE(code) == PIDFS_IOCTL_MAGIC
@@ -139,6 +159,12 @@ pidfd_ioctl_print_pidfd_get_info(struct tcb *tcp,
 int
 pidfd_ioctl(struct tcb *tcp, unsigned int code, kernel_ulong_t arg)
 {
+	if (pidfd_ioctl_is_namespace_fd(code)) {
+		tprints_arg_next_name("argp");
+		PRINT_VAL_X(arg);
+		return RVAL_IOCTL_DECODED | RVAL_FD;
+	}
+
 	if (!pidfd_ioctl_is_get_info(code))
 		return RVAL_DECODED;
 

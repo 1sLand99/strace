@@ -421,6 +421,7 @@ ioctl_pidfd_get_info-success
 ioctl_pidfd_get_info-success-Xabbrev
 ioctl_pidfd_get_info-success-Xraw
 ioctl_pidfd_get_info-success-Xverbose
+ioctl_pidfd_namespace
 ioctl_perf
 ioctl_perf-success
 ioctl_ptp
