@@ -144,6 +144,7 @@ check_PROGRAMS = $(PURE_EXECUTABLES) \
 	count-f \
 	delay \
 	detach-vfork \
+	env-i \
 	execve-v \
 	execveat-v \
 	fcntl--pidns-translation \
