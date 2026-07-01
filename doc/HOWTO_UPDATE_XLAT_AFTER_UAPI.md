@@ -189,6 +189,15 @@ Use [maint/update-xlat.sh](../maint/update-xlat.sh) only for files with
 enum generator.  It does not replace the Step 1–2 workflow for hand-edited
 xlats.
 
+### Netlink attributes: read the kernel commit for data types
+
+For netlink attribute constants (e.g. `IFLA_BRPORT_*`, `IFLA_INFO_*`),
+read the introducing kernel commit or the netlink YAML spec
+(`Documentation/netlink/specs/*.yaml`) to determine the attribute's data
+type (`u8`, `u16`, `u32`, `string`, etc.).  This tells you whether a
+**decoder table** entry is also needed — but that is a **separate
+follow-up commit**, not part of the xlat update (see Step 5).
+
 ## Step 4 — Regenerate generated xlat headers and test
 
 - After changing `*.in`, a normal `make` (or your usual build) should
@@ -283,7 +292,21 @@ first failing `make check` run:
    to any test that probes the boundary between decoded and unrecognised
    values.
 
-6. **`NEWS` wording.**
+6. **Netlink test array placement depends on decoder state.**
+   Netlink tests (e.g. `tests/nlattr_ifla_brport.c`,
+   `tests/nlattr_ifla_linkinfo.c`) typically have separate arrays for
+   "unhandled" attributes (printed as raw hex data) and type-specific
+   attributes (`u8_attrs[]`, `u16_attrs[]`, `u32_attrs[]`, etc.).  When
+   adding a new xlat constant **without** a corresponding decoder entry,
+   place the test entry in the unhandled array (`un_attrs[]`,
+   `und_brport_attrs[]`).  When adding a decoder entry in a follow-up
+   commit, move the test entry from the unhandled array to the
+   appropriate type-specific array.  Putting a constant in the wrong
+   array causes test failures because strace's output format differs
+   between decoded values (e.g. `171`) and unhandled raw-hex dumps
+   (e.g. `"\xab\xac\xdb\xcd"`).
+
+7. **`NEWS` wording.**
    Follow the style of surrounding bullets: short **family** names
    (`KVM_*`, `NETDEV_*`, `NL80211_*`) rather than only the longest exact
    prefixes (`KVM_CAP_*`, `NETDEV_CMD_*`, `NL80211_CMD_*`) unless the release
@@ -303,6 +326,15 @@ first failing `make check` run:
   as the related `src/xlat/*.in` and test changes (same commit as each
   logical chunk, or one summary `NEWS` commit at the end that matches the
   tables you touched)—not as a detached documentation-only change.
+- **Decoder updates are separate commits.**  Adding a constant to an
+  xlat `*.in` file makes strace recognise the constant's **name**.
+  Making strace decode the attribute's **value** (e.g. adding
+  `[IFLA_BRPORT_FOO] = decode_nla_u8` to a `nla_decoder_t` table in
+  [src/rtnl_link.c](../src/rtnl_link.c)) is separate work that belongs
+  in its own follow-up commit with its own test adjustments.  The xlat
+  commit's tests should place the new constant in the "known but
+  unhandled" test array; the decoder commit moves it to the
+  type-specific array (e.g. `u8_attrs[]`).
 - Group updates by the **basename of kernel headers** referenced in
   `new-xlat-constants.tab` (column 2), then by related
   **prefixes/suffixes/patterns** from that table (for example, families
