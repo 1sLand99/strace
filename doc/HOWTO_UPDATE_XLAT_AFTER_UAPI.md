@@ -254,7 +254,22 @@ first failing `make check` run:
    set **`LAST_CMD` to the last named enum member you added**, not an older
    sentinel — otherwise the fake “unknown” command ID drifts.
 
-5. **`NEWS` wording.**
+5. **Boundary-value test entries (`tests/bpf.c` and similar).**
+   Many tests exercise two complementary cases side by side: the **last
+   known** constant (expecting a symbolic name) and the **first unknown**
+   value — one past the end — expecting `0xNN /* PREFIX_??? */`.  When you
+   add new constants to an xlat, the old "first unknown" value becomes
+   known.  **Do not** just update the expected string from `??? ` to the
+   new name — that collapses both entries into "known" tests and loses
+   coverage of the unknown-value code path.  Instead, **shift both the
+   numeric `.data` value and the `.str` expectation** so the "last known"
+   entry tests your newly added constant, and the "first unknown" entry
+   stays one past the new end.  The same pattern applies to
+   `#value_indexed` xlats (e.g. `bpf_map_types`, `bpf_attach_type`) and
+   to any test that probes the boundary between decoded and unrecognised
+   values.
+
+6. **`NEWS` wording.**
    Follow the style of surrounding bullets: short **family** names
    (`KVM_*`, `NETDEV_*`, `NL80211_*`) rather than only the longest exact
    prefixes (`KVM_CAP_*`, `NETDEV_CMD_*`, `NL80211_CMD_*`) unless the release
@@ -375,8 +390,9 @@ xlats, and a dedicated place for the `K_CSI_*` keycap `K(KT_CSI, …)` lines.
 7. [ ] Update tests and `NEWS` when output changes; commit with
    `xlat: …` message per [doc/COMMIT-MESSAGES.md](COMMIT-MESSAGES.md).
 8. [ ] Re-scan tests: `grep` for composite masks (Landlock), crafted
-   clone3 masks, netlink “last command + 1”, and ioctl_kd keyboard macros;
-   align with **Pitfalls seen in review** earlier in this document; run `make check` again.
+   clone3 masks, netlink “last command + 1”, boundary-value test entries
+   (BPF and similar), and ioctl_kd keyboard macros; align with
+   **Pitfalls seen in review** earlier in this document; run `make check` again.
 
 ## References
 
