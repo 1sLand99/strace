@@ -200,6 +200,20 @@ xlats.
   strings, update it when a constant becomes decodable.  A practical
   signal: use `git log` on a given `src/xlat/foo.in` — if past commits
   for that file touched `tests/…`, the next UAPI change likely will too.
+- **Finding the right test file for an xlat:** not every affected test
+  will fail — some tests enumerate all known constants in arrays that
+  must be extended manually.  To find the test with the densest coverage
+  of a given xlat, grep `tests/` for all constant names in the `.in`
+  file and pick the file with the most hits:
+  ```sh
+  git grep -E -w "$(sed -n 's/^\(1<<\)\?\([A-Z_][A-Z_0-9]*\).*/\2/p' \
+    src/xlat/FOO.in | sort -u | tr '\n' '|' | sed 's/|$//')" -- tests \
+    | cut -d: -f1 | sort | uniq -c | sort -n | tail -1
+  ```
+  For example, `open_mode_flags.in` points to `tests/openat.c`, whose
+  `flags[]` array lists every flag — a new flag added to the xlat must
+  be added there too, even though `make check` will not catch the
+  omission.
 - Run a full check to identify all failing tests, e.g.
   `./bootstrap && ./configure && make -s -j$(nproc) && make -s -j$(nproc) check VERBOSE=1`.
 - After fixing tests, run a focused check of those tests that were failing
