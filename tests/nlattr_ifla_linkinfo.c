@@ -920,7 +920,8 @@ main(void)
 		{ 0, "IFLA_BRPORT_UNSPEC" },
 		{ 24, "IFLA_BRPORT_FLUSH" },
 		{ 26, "IFLA_BRPORT_PAD" },
-		{ 45, "0x2d /* IFLA_BRPORT_??? */" },
+		{ 45, "IFLA_BRPORT_NEIGH_FORWARD_GRAT" },
+		{ 46, "0x2e /* IFLA_BRPORT_??? */" },
 		{ 2989, "0xbad /* IFLA_BRPORT_??? */" },
 	};
 
