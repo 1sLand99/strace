@@ -920,7 +920,6 @@ main(void)
 		{ 0, "IFLA_BRPORT_UNSPEC" },
 		{ 24, "IFLA_BRPORT_FLUSH" },
 		{ 26, "IFLA_BRPORT_PAD" },
-		{ 45, "IFLA_BRPORT_NEIGH_FORWARD_GRAT" },
 		{ 46, "0x2e /* IFLA_BRPORT_??? */" },
 		{ 2989, "0xbad /* IFLA_BRPORT_??? */" },
 	};
@@ -966,6 +965,7 @@ main(void)
 		{ ARG_STR(IFLA_BRPORT_LOCKED) },
 		{ ARG_STR(IFLA_BRPORT_MAB) },
 		{ ARG_STR(IFLA_BRPORT_NEIGH_VLAN_SUPPRESS) },
+		{ ARG_STR(IFLA_BRPORT_NEIGH_FORWARD_GRAT) },
 	};
 
 	for (size_t k = 0; k < ARRAY_SIZE(u8_brport_attrs); k++) {
