@@ -2160,6 +2160,9 @@ static const uint8_t special_attach_types[] = {
 	54 /* BPF_NETKIT_PRIMARY */,
 	55 /* BPF_NETKIT_PEER */,
 	58 /* BPF_TRACE_FSESSION */,
+	59 /* BPF_TRACE_FENTRY_MULTI */,
+	60 /* BPF_TRACE_FEXIT_MULTI */,
+	61 /* BPF_TRACE_FSESSION_MULTI */,
 };
 
 static size_t
@@ -2297,6 +2300,52 @@ print_BPF_LINK_CREATE_attr12(const struct bpf_attr_check *check,
 		}
 	}
 	printf("]}}");
+}
+
+static const uint32_t tm_ids_data[] = { 1, 42, 0xfacefeed, 0xbadc0ded };
+static uint32_t *tm_ids_data_p;
+static const uint64_t tm_cookies_data[] = { 0, 0xdeadc0defacecafeULL,
+					    0x123456789abcdef0ULL,
+					    0xfeedface00000001ULL };
+static uint64_t *tm_cookies_data_p;
+
+static_assert(ARRAY_SIZE(tm_ids_data) == ARRAY_SIZE(tm_cookies_data),
+	      "tm_ids_data and tm_cookies_data must have the same count");
+
+static void
+init_BPF_LINK_CREATE_tracing_multi(struct bpf_attr_check *check, size_t idx)
+{
+	struct BPF_LINK_CREATE_struct *attr = &check->data.BPF_LINK_CREATE_data;
+
+	if (!tm_ids_data_p)
+		tm_ids_data_p = tail_memdup(tm_ids_data, sizeof(tm_ids_data));
+	if (!tm_cookies_data_p)
+		tm_cookies_data_p = tail_memdup(tm_cookies_data,
+						sizeof(tm_cookies_data));
+
+	attr->tracing_multi.cnt = ARRAY_SIZE(tm_ids_data) + idx;
+	attr->tracing_multi.ids = (uintptr_t) tm_ids_data_p;
+	attr->tracing_multi.cookies = (uintptr_t) tm_cookies_data_p;
+}
+
+static void
+print_BPF_LINK_CREATE_tracing_multi(const struct bpf_attr_check *check,
+				    unsigned long addr, size_t idx)
+{
+	printf("link_create={prog_fd=0" FD0_PATH ", target_fd=0" FD0_PATH
+	       ", attach_type=BPF_TRACE_FENTRY_MULTI, flags=0"
+	       ", tracing_multi={ids=[1, 42, 4207869677, 3134983661");
+	if (idx) {
+		printf(", ... /* %p */",
+		       tm_ids_data_p + ARRAY_SIZE(tm_ids_data));
+	}
+	printf("], cookies=[0, 0xdeadc0defacecafe"
+	       ", 0x123456789abcdef0, 0xfeedface00000001");
+	if (idx) {
+		printf(", ... /* %p */",
+		       tm_cookies_data_p + ARRAY_SIZE(tm_cookies_data));
+	}
+	printf("], cnt=%zu}}", ARRAY_SIZE(tm_ids_data) + idx);
 }
 
 static struct bpf_attr_check BPF_LINK_CREATE_checks[] = {
@@ -2702,6 +2751,56 @@ static struct bpf_attr_check BPF_LINK_CREATE_checks[] = {
 		.str = "link_create={prog_fd=0" FD0_PATH", target_fd=0" FD0_PATH
 		       ", attach_type=BPF_CGROUP_INET_SOCK_RELEASE, flags=0"
 		       ", target_btf_id=4207869677}"
+	},
+
+	{ /* 29 - tracing_multi with cnt=0 */
+		.data = { .BPF_LINK_CREATE_data = {
+			.attach_type = 59, /* BPF_TRACE_FENTRY_MULTI */
+			.tracing_multi = {
+				.cnt = 0,
+			},
+		} },
+		.size = offsetofend(struct BPF_LINK_CREATE_struct,
+				    tracing_multi.cnt),
+		.str = "link_create={prog_fd=0" FD0_PATH", target_fd=0" FD0_PATH
+		       ", attach_type=BPF_TRACE_FENTRY_MULTI, flags=0"
+		       ", tracing_multi={ids=NULL, cookies=NULL, cnt=0}}"
+	},
+	{ /* 30 - tracing_multi with arrays */
+		.data = { .BPF_LINK_CREATE_data = {
+			.attach_type = 59, /* BPF_TRACE_FENTRY_MULTI */
+		} },
+		.size = offsetofend(struct BPF_LINK_CREATE_struct,
+				    tracing_multi.cnt),
+		.iters = 2,
+		.init_fn = init_BPF_LINK_CREATE_tracing_multi,
+		.print_fn = print_BPF_LINK_CREATE_tracing_multi,
+	},
+	{ /* 31 - BPF_TRACE_FEXIT_MULTI */
+		.data = { .BPF_LINK_CREATE_data = {
+			.attach_type = 60, /* BPF_TRACE_FEXIT_MULTI */
+			.tracing_multi = {
+				.cnt = 0,
+			},
+		} },
+		.size = offsetofend(struct BPF_LINK_CREATE_struct,
+				    tracing_multi.cnt),
+		.str = "link_create={prog_fd=0" FD0_PATH", target_fd=0" FD0_PATH
+		       ", attach_type=BPF_TRACE_FEXIT_MULTI, flags=0"
+		       ", tracing_multi={ids=NULL, cookies=NULL, cnt=0}}"
+	},
+	{ /* 32 - BPF_TRACE_FSESSION_MULTI */
+		.data = { .BPF_LINK_CREATE_data = {
+			.attach_type = 61, /* BPF_TRACE_FSESSION_MULTI */
+			.tracing_multi = {
+				.cnt = 0,
+			},
+		} },
+		.size = offsetofend(struct BPF_LINK_CREATE_struct,
+				    tracing_multi.cnt),
+		.str = "link_create={prog_fd=0" FD0_PATH", target_fd=0" FD0_PATH
+		       ", attach_type=BPF_TRACE_FSESSION_MULTI, flags=0"
+		       ", tracing_multi={ids=NULL, cookies=NULL, cnt=0}}"
 	},
 };
 

@@ -517,6 +517,12 @@ struct BPF_LINK_CREATE_struct /* link_create */ {
 			 */
 			uint64_t ATTRIBUTE_ALIGNED(8) expected_revision;
 		} cgroup; /* skip check */
+
+		struct {
+			uint64_t ATTRIBUTE_ALIGNED(8) ids;
+			uint64_t ATTRIBUTE_ALIGNED(8) cookies;
+			uint32_t cnt;
+		} tracing_multi;
 	};
 };
 
