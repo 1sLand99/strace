@@ -2012,8 +2012,12 @@ BEGIN_BPF_CMD_DECODER(BPF_LINK_CREATE)
 				  "BPF_F_UPROBE_MULTI_???");
 		tprint_struct_next();
 		PRINT_FIELD_TGID(attr.uprobe_multi, pid, tcp);
+		if (len > offsetof(typeof(attr), uprobe_multi.path_fd)) {
+			tprint_struct_next();
+			PRINT_FIELD_FD(attr.uprobe_multi, path_fd, tcp);
+		}
 		tprint_struct_end();
-		attr_size = offsetofend(typeof(attr), uprobe_multi.pid);
+		attr_size = offsetofend(typeof(attr), uprobe_multi.path_fd);
 		break;
 	}
 
