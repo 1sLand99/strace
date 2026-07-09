@@ -24,7 +24,7 @@ print_landlock_ruleset_attr(struct tcb *tcp, const kernel_ulong_t addr,
 	const size_t min_attr_size =
 		offsetofend(typeof(attr), handled_access_fs);
 	const size_t max_attr_size =
-		offsetofend(typeof(attr), scoped);
+		offsetofend(typeof(attr), quiet_scoped);
 
 	if (size < min_attr_size) {
 		printaddr(addr);
@@ -48,6 +48,27 @@ print_landlock_ruleset_attr(struct tcb *tcp, const kernel_ulong_t addr,
 	if (size > offsetof(typeof(attr), scoped)) {
 		tprint_struct_next();
 		PRINT_FIELD_FLAGS(attr, scoped,
+				  landlock_scope_flags,
+				  "LANDLOCK_SCOPE_???");
+	}
+
+	if (size > offsetof(typeof(attr), quiet_access_fs)) {
+		tprint_struct_next();
+		PRINT_FIELD_FLAGS(attr, quiet_access_fs,
+				  landlock_ruleset_access_fs,
+				  "LANDLOCK_ACCESS_FS_???");
+	}
+
+	if (size > offsetof(typeof(attr), quiet_access_net)) {
+		tprint_struct_next();
+		PRINT_FIELD_FLAGS(attr, quiet_access_net,
+				  landlock_ruleset_access_net,
+				  "LANDLOCK_ACCESS_NET_???");
+	}
+
+	if (size > offsetof(typeof(attr), quiet_scoped)) {
+		tprint_struct_next();
+		PRINT_FIELD_FLAGS(attr, quiet_scoped,
 				  landlock_scope_flags,
 				  "LANDLOCK_SCOPE_???");
 	}
