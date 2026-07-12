@@ -10,6 +10,7 @@
 
 #include <linux/landlock.h>
 
+#include "xlat/landlock_add_rule_flags.h"
 #include "xlat/landlock_create_ruleset_flags.h"
 #include "xlat/landlock_rule_types.h"
 #include "xlat/landlock_ruleset_access_fs.h"
@@ -167,7 +168,8 @@ SYS_FUNC(landlock_add_rule)
 
 	/* flags */
 	tprints_arg_next_name("flags");
-	PRINT_VAL_X((unsigned int) tcp->u_arg[3]);
+	printflags(landlock_add_rule_flags, tcp->u_arg[3],
+		   "LANDLOCK_ADD_RULE_???");
 
 	return RVAL_DECODED;
 }
