@@ -35,6 +35,7 @@
 #include "xlat/uring_mem_region_reg_flags.h"
 #include "xlat/uring_query_ops.h"
 #include "xlat/uring_zcrx_ctrl_ops.h"
+#include "xlat/uring_zcrx_notif_types.h"
 #include "xlat/uring_rw_attr_flags.h"
 #include "xlat/uring_nop_flags.h"
 #include "xlat/uring_fixed_fd_flags.h"
@@ -1316,6 +1317,23 @@ print_zcrx_ctrl_export(struct tcb *tcp,
 	tprint_struct_end();
 }
 
+static void
+print_zcrx_ctrl_arm_notif(struct tcb *tcp,
+			  const struct zcrx_ctrl_arm_notif *const arm)
+{
+	tprint_struct_begin();
+
+	PRINT_FIELD_XVAL(*arm, notif_type, uring_zcrx_notif_types,
+			 "ZCRX_NOTIF_???");
+
+	if (!IS_ARRAY_ZERO(arm->__resv)) {
+		tprint_struct_next();
+		PRINT_FIELD_ARRAY(*arm, __resv, tcp, print_xint_array_member);
+	}
+
+	tprint_struct_end();
+}
+
 static int
 print_io_uring_zcrx_ctrl(struct tcb *tcp, const kernel_ulong_t addr)
 {
@@ -1375,6 +1393,13 @@ print_io_uring_zcrx_ctrl(struct tcb *tcp, const kernel_ulong_t addr)
 		/* Don't close structure - it will be closed on exit after adding zc_export */
 		/* Return 0 to indicate we need to decode on exit */
 		return 0;
+
+	case ZCRX_CTRL_ARM_NOTIFICATION:
+		tprint_struct_next();
+		tprints_field_name("zc_arm_notif");
+		print_zcrx_ctrl_arm_notif(tcp, &arg.zc_arm_notif);
+		tprint_struct_end();
+		return RVAL_DECODED;
 
 	default:
 		/* Unknown opcode - skip union printing */
