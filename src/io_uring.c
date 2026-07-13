@@ -1585,6 +1585,35 @@ print_io_uring_query_zcrx(struct tcb *tcp, const kernel_ulong_t addr)
 }
 
 static void
+print_io_uring_query_zcrx_notif(struct tcb *tcp, const kernel_ulong_t addr)
+{
+	struct io_uring_query_zcrx_notif notif;
+
+	if (umove_or_printaddr(tcp, addr, &notif))
+		return;
+
+	CHECK_TYPE_SIZE(struct io_uring_query_zcrx_notif, 48);
+
+	tprint_struct_begin();
+	PRINT_FIELD_X(notif, notif_flags);
+	tprint_struct_next();
+	PRINT_FIELD_U(notif, notif_stats_size);
+	tprint_struct_next();
+	PRINT_FIELD_U(notif, notif_stats_off_alignment);
+
+	if (notif.__resv1) {
+		tprint_struct_next();
+		PRINT_FIELD_X(notif, __resv1);
+	}
+	if (!IS_ARRAY_ZERO(notif.__resv2)) {
+		tprint_struct_next();
+		PRINT_FIELD_ARRAY(notif, __resv2, tcp, print_xint_array_member);
+	}
+
+	tprint_struct_end();
+}
+
+static void
 print_io_uring_query_scq(struct tcb *tcp, const kernel_ulong_t addr)
 {
 	struct io_uring_query_scq scq;
@@ -1652,6 +1681,10 @@ print_io_uring_query_list(struct tcb *tcp, kernel_ulong_t addr)
 				break;
 			case IO_URING_QUERY_SCQ:
 				print_io_uring_query_scq(tcp, hdr.query_data);
+				break;
+			case IO_URING_QUERY_ZCRX_NOTIF:
+				print_io_uring_query_zcrx_notif(tcp,
+								hdr.query_data);
 				break;
 			default:
 				printaddr(hdr.query_data);
