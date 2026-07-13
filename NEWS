@@ -8,8 +8,8 @@ Noteworthy changes in release ?.? (????-??-??)
   * Updated decoding of BPF_LINK_CREATE uprobe_multi attribute.
   * Updated decoding of struct landlock_ruleset_attr.
   * Updated decoding of landlock_add_rule syscall flags.
-  * Updated lists of BPF_*, ETH_P_*, FS_*, FUTEX_*, IFLA_*, KVM_*, LANDLOCK_*,
-    NL80211_*, O_*, RTEXT_*, V4L2_*, and XFRM_MSG_* constants.
+  * Updated lists of BPF_*, ETH_P_*, FS_*, FUTEX_*, IFLA_*, IO_URING_*, KVM_*,
+    LANDLOCK_*, NL80211_*, O_*, RTEXT_*, V4L2_*, and XFRM_MSG_* constants.
 
 Noteworthy changes in release 7.1 (2026-06-15)
 ==============================================
