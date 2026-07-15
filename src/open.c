@@ -68,7 +68,7 @@ done:		;
  * other bits are real flags.
  */
 static const char *
-sprint_open_modes64(uint64_t flags)
+sprint_open_mode_flags(uint64_t flags, ...)
 {
 	static char outstr[sizeof("flags O_ACCMODE")];
 	char *p;
@@ -81,15 +81,25 @@ sprint_open_modes64(uint64_t flags)
 	if (str) {
 		*p++ = sep;
 		p = stpcpy(p, str);
-		flags &= ~3;
+		flags &= ~(uint64_t) 3;
 		if (!flags)
 			return outstr;
 		sep = '|';
 	}
 	*p = '\0';
 
-	return sprintflags_ex(outstr, open_mode_flags, flags, sep,
-			      XLAT_STYLE_ABBREV) ?: outstr;
+	va_list args;
+	va_start(args, flags);
+	str = sprintflags_exv(outstr, flags, sep, XLAT_STYLE_ABBREV, args);
+	va_end(args);
+
+	return str ?: outstr;
+}
+
+static const char *
+sprint_open_modes64(uint64_t flags)
+{
+	return sprint_open_mode_flags(flags, open_mode_flags, NULL);
 }
 
 const char *
